@@ -1,0 +1,207 @@
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable",
+		lazypath,
+	})
+end
+
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup({
+	{
+		"folke/tokyonight.nvim",
+		priority = 1000,
+
+		config = function()
+			vim.cmd.colorscheme("tokyonight")
+		end,
+	},
+
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+
+		config = function()
+			require("nvim-treesitter").setup({
+				ensure_installed = { "c", "cpp", "lua", "vim" },
+
+				highlight = {
+					enable = true,
+				},
+			})
+		end,
+	},
+
+	{
+		"neovim/nvim-lspconfig",
+
+		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			vim.lsp.config("clangd", {
+				capabilities = capabilities,
+			})
+			vim.lsp.enable("clangd")
+
+			vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
+			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, {})
+		end,
+	},
+	{
+		"hrsh7th/nvim-cmp",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp"
+		},
+
+		config = function()
+			local cmp = require("cmp")
+
+			cmp.setup({
+				mapping = cmp.mapping.preset.insert({
+					["<Tab>"] = cmp.mapping.select_next_item(),
+					["<S-Tab>"] = cmp.mapping.select_prev_item(),
+					["<CR>"] = cmp.mapping.confirm({ select = true}),
+				}),
+				sources = {
+					{ name = "nvim_lsp" },
+				},
+			})
+		end,
+	},
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim"
+		},
+
+		config = function()
+			local builtin = require("telescope.builtin")
+
+			vim.keymap.set("n", "<leader>ff", builtin.find_files, {})
+			vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+			vim.keymap.set("n", "<leader>fb", builtin.buffers, {})
+			vim.keymap.set("n", "<leader>fh", builtin.help_tags, {})
+		end,
+	},
+	{
+		"lewis6991/gitsigns.nvim",
+
+		config = function()
+			require("gitsigns").setup()
+		end,
+	},
+
+	{
+		"rcarriga/nvim-dap-ui",
+		dependencies = {
+			"mfussenegger/nvim-dap",
+			"nvim-neotest/nvim-nio",
+		},
+		
+		config = function()
+			local dap = require("dap")
+			local dapui = require("dapui")
+
+			dapui.setup()
+
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+
+			dap.listeners.before.launch.dapui_config = function()
+				dapui.open()
+			end
+
+			dap.listeners.before.event_terminated.dapui_config = function()
+				dapui.close()
+			end
+
+			dap.listeners.before.event_exited.dapui_config = function()
+				dapui.close()
+			end
+
+		end,
+	},
+
+	{
+		"mfussenegger/nvim-dap",
+
+		config = function()
+			local dap = require("dap")
+
+			-- ===========================
+			-- Code lldb adapter
+			-- ===========================
+			
+			dap.adapters.codelldb = {
+				type = "server",
+				port = "${port}",
+
+				executable = {
+					command = "/opt/codelldb/codelldb/extension/adapter/codelldb",
+					args = {
+						"--port",
+						"${port}",
+					},
+				}
+			}
+			--======================
+			--c/c++ and rust config
+			--======================
+			dap.configurations.cpp = {
+				{
+					name = "Launch file",
+					type = "codelldb",
+					request = "launch",
+
+					program = function()
+						return vim.fn.input(
+						'Path to executable: ',
+						vim.fn.getcwd() .. '/',
+						'file'
+						)
+					end,
+
+					cwd = "${workspaceFolder}",
+					stopOnEntry = false,
+				},
+			}
+			dap.configurations.c = dap.configurations.cpp
+			dap.configurations.rust = dap.configurations.cpp
+
+			--========================
+			--Break point signs
+			--========================
+			vim.fn.sign_define(
+			'DapBreakpoint',
+			{
+				text = '🔴',
+				texthl = '',
+				linehl = '',
+				numhl = ''
+			}
+			)
+
+			--=========================
+			--keymaps
+			--========================
+			vim.keymap.set("n", "<F5>", dap.continue)
+			vim.keymap.set("n", "<F10>", dap.step_over)
+			vim.keymap.set("n", "<F11>", dap.step_into)
+			vim.keymap.set("n", "<F12>", dap.step_out)
+
+			vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint)
+
+			vim.keymap.set("n", "<leader>dr", dap.real.open)
+			vim.keymap.set("n", "<leader>dl", dap.run_last)
+		end,
+	},
+
+})

@@ -1,0 +1,10 @@
+.
+├── init.lua
+├── lazy-lock.json
+├── logfile
+└── lua
+    └── config
+        ├── lazy.lua
+        └── sample.txt
+
+3 directories, 5 files
