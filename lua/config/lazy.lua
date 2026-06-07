@@ -203,5 +203,12 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>dl", dap.run_last)
 		end,
 	},
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		config = function()
+			require("nvim-autopairs").setup({})
+		end,
+	},
 
 })
