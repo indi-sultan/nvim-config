@@ -192,15 +192,17 @@ require("lazy").setup({
 			--=========================
 			--keymaps
 			--========================
-			vim.keymap.set("n", "<F5>", dap.continue)
-			vim.keymap.set("n", "<F10>", dap.step_over)
-			vim.keymap.set("n", "<F11>", dap.step_into)
-			vim.keymap.set("n", "<F12>", dap.step_out)
+			vim.keymap.set("n", "<leader>c", dap.continue)
+			vim.keymap.set("n", "<leader>u", dap.step_over)
+			vim.keymap.set("n", "<leader>i", dap.step_into)
+			vim.keymap.set("n", "<leader>o", dap.step_out)
 
 			vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint)
 
 			vim.keymap.set("n", "<leader>dr", dap.repl.open)
 			vim.keymap.set("n", "<leader>dl", dap.run_last)
+			vim.keymap.set("n", "<leader>dq", function() require("dap").terminate() end)
+			vim.keymap.set("n", "<leader>du", function() require("dapui").toggle() end)
 		end,
 	},
 	{
