@@ -270,6 +270,9 @@ require("lazy").setup({
 				options = {
 					theme = "auto",
 					globalstatus = true,
+					icons_enabled = false,
+					component_separators = "|",
+					section_separators = "|",
 				},
 				sections = {
 					lualine_a = {
@@ -281,7 +284,7 @@ require("lazy").setup({
 					lualine_c = {
 						{
 							"filename",
-							path = 1,
+							path = 3,
 						},
 					},
 					lualine_x = {
