@@ -307,5 +307,12 @@ require("lazy").setup({
 			})
 		end,
 	},
+	{
+		--==================
+		--multiline comment plugin
+		--===================
+		"numToStr/Comment.nvim",
+		opts = {},
+	},
 
 })
