@@ -212,5 +212,97 @@ require("lazy").setup({
 			require("nvim-autopairs").setup({})
 		end,
 	},
+	{        -- ===========================
+		 -- plugin for status bar
+		 -- ===========================
+		"nvim-lualine/lualine.nvim",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
+		},
+
+		config = function()
+
+			local function lsp_name()
+				local clients = vim.lsp.get_clients({ bufnr = 0 })
+
+				if #clients == 0 then
+					return "No LSP"
+				end
+
+				return clients[1].name
+			end
+
+			local function dap_status()
+				local ok, dap = pcall(require, "dap")
+
+				if not ok then
+					return ""
+				end
+
+				local status = dap.status()
+
+				if status == "" then
+					return ""
+				end
+
+				return "🐞 " .. status
+			end
+
+			local function cmake_build_type()
+
+				local cwd = vim.fn.getcwd()
+
+				local cache = cwd .. "/build/CMakeCache.txt"
+
+				if vim.fn.filereadable(cache) == 0 then
+					return ""
+				end
+
+				for _, line in ipairs(vim.fn.readfile(cache)) do
+					local build_type = line:match("^CMAKE_BUILD_TYPE:STRING=(.+)$")
+					if build_type then
+						return build_type
+					end
+				end
+				return ""
+			end
+			require("lualine").setup({
+				options = {
+					theme = "auto",
+					globalstatus = true,
+				},
+				sections = {
+					lualine_a = {
+						"mode",
+					},
+					lualine_b = {
+						"branch",
+					},
+					lualine_c = {
+						{
+							"filename",
+							path = 1,
+						},
+					},
+					lualine_x = {
+						{
+							"diagnostics",
+							sources = { "nvim_diagnostic" },
+						},
+						lsp_name,
+						dap_status,
+						cmake_build_type,
+						"filetype",
+					},
+					lualine_y = {
+						"progress",
+					},
+					lualine_z = {
+						"location",
+					},
+				},
+			})
+		end,
+	},
 
 })
